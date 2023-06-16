@@ -24,13 +24,18 @@ The US Naval Research Laboratory Date: 21 Aug 2020'''
 import numpy as np
 import os.path
 from pyebsdindex import crystal_sym, rotlib
-from pandas import DataFrame as df
+from pandas import DataFrame 
+from pathlib import Path
+# import importlib.resources as pkg_resources #try to read .txt file for phases
+# from data import
+
+
 
 RADEG = 180.0/np.pi
 
 
 class triplib():
-  def __init__(self, libType='FCC', phaseName=None, laticeParameter = None):
+  def __init__(self, libType='FCC', phaseName=None, laticeParameter = None,dataPath= None):
     self.family = None
     self.nfamily = None
     self.angles = None
@@ -46,7 +51,7 @@ class triplib():
     self.qsymops = None
     self.phaseName = None
     self.latticeParameter = np.array([1.0, 1.0, 1.0, 90.0, 90.0, 90.0])
-
+    self.dataPath= dataPath
     if libType is None:
       return
 
@@ -77,7 +82,8 @@ class triplib():
         self.latticeParameter = laticeParameter
     
     else:
-      self.build_genphase(phaseName)
+      self.phaseName=phaseName
+      self.build_genphase()
     
 
       
@@ -105,16 +111,25 @@ class triplib():
     self.build_trip_lib(poles,crystal_sym.cubicsym_q())
 
 
-  def build_genphase(self,phaseName):
+  def build_genphase(self):
+    phasePath=Path(f"{self.dataPath}/{self.phaseName}.txt")
+    print(f"{self.dataPath}/{self.phaseName}.txt")
     try:
-      if not os.path.isfile(f"../{phaseName}.txt"):
+      if not os.path.isfile(phasePath):
         raise ValueError("Your specified phase is not in the Database")
-      self.genfromtxt(self,phaseName)
+      #df=DataFrame.from_dict(f"phases/{phaseName}.txt")
+      #self.polePairs=df['PlaneReflector']   
+      self.genfromtxt(phasePath)
     except ValueError as e:
         print(e)
   
-  def genfromtxt(self,phaseName):
-    df.from_dict(f"../{phaseName}.txt")
+  def genfromtxt(self,phasePath):
+    #inp_file = (pkg_resources.files(templates) / 'temp_file')
+    with phasePath.open("r") as f:
+      #template = f.read()    
+      #with open(f"phases/{self.phaseName}.txt") as f:
+      phase_dict=eval(f.read())
+    self.polePairs=phase_dict['PlaneReflector']
 
   def build_trip_lib(self,poles,symmetry):
     nsym = symmetry.shape[0]
