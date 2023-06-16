@@ -50,6 +50,7 @@ class triplib():
     self.laue_code = None
     self.qsymops = None
     self.phaseName = None
+    self.Atoms= None
     self.latticeParameter = np.array([1.0, 1.0, 1.0, 90.0, 90.0, 90.0])
     self.dataPath= dataPath
     if libType is None:
@@ -130,6 +131,9 @@ class triplib():
       #with open(f"phases/{self.phaseName}.txt") as f:
       phase_dict=eval(f.read())
     self.polePairs=phase_dict['PlaneReflector']
+    self.latticeParameter=dict['Lattice']
+    self.Symmetry_pgID=dict["Symmetry"]
+    self.Atoms=dict["Atoms"]
 
   def build_trip_lib(self,poles,symmetry):
     nsym = symmetry.shape[0]
