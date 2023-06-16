@@ -22,8 +22,9 @@ The US Naval Research Laboratory Date: 21 Aug 2020'''
 
 
 import numpy as np
+import os.path
 from pyebsdindex import crystal_sym, rotlib
-
+from pandas import DataFrame as df
 
 RADEG = 180.0/np.pi
 
@@ -64,7 +65,7 @@ class triplib():
       else:
         self.latticeParameter = laticeParameter
 
-    if str(libType).upper() == 'BCC':
+    elif str(libType).upper() == 'BCC':
 
       self.build_bcc()
 
@@ -74,7 +75,15 @@ class triplib():
         self.latticeParameter = np.array([1.0,1.0,1.0,90.0,90.0,90.0])
       else:
         self.latticeParameter = laticeParameter
+    
+    else:
+      self.build_genphase(phaseName)
+    
 
+      
+   
+   
+    #if str(libType).upper() ==
   def build_fcc(self):
     if self.phaseName is None:
       self.phaseName = 'FCC'
@@ -94,6 +103,18 @@ class triplib():
     self.qsymops = crystal_sym.cubicsym_q()
     poles = np.array([[0,1,1],[0,0,2],[1,1,2],[0,1,3]])
     self.build_trip_lib(poles,crystal_sym.cubicsym_q())
+
+
+  def build_genphase(self,phaseName):
+    try:
+      if not os.path.isfile(f"../{phaseName}.txt"):
+        raise ValueError("Your specified phase is not in the Database")
+      self.genfromtxt(self,phaseName)
+    except ValueError as e:
+        print(e)
+  
+  def genfromtxt(self,phaseName):
+    df.from_dict(f"../{phaseName}.txt")
 
   def build_trip_lib(self,poles,symmetry):
     nsym = symmetry.shape[0]
